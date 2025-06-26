@@ -6,13 +6,13 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+# Обновление и установка time-syncd
 echo "Обновление системы и установка time-syncd..."
-
-# Обновление и установка пакетов
 apt update -y
 apt install -y systemd-timesyncd
 
-# Убедимся, что служба активна и включена
+# Активация и перезапуск службы
+echo "Активация службы time-syncd..."
 systemctl enable systemd-timesyncd.service
 systemctl restart systemd-timesyncd.service
 
@@ -23,9 +23,10 @@ if ! systemctl is-active --quiet systemd-timesyncd.service; then
 fi
 
 # Принудительная синхронизация времени
+echo "Включение синхронизации NTP..."
 timedatectl set-ntp true
 
-# Проверка успешности синхронизации (ожидание до 30 секунд)
+# Проверка успешности синхронизации
 echo "Проверка синхронизации времени..."
 for i in {1..6}; do
     if timedatectl | grep -q "synchronized: yes"; then
@@ -37,9 +38,9 @@ for i in {1..6}; do
     fi
 done
 
-# Если синхронизация не удалась, выводим предупреждение
+# Предупреждение при неудаче
 if ! timedatectl | grep -q "synchronized: yes"; then
-    echo "Предупреждение: синхронизация времени не удалась. Проверьте подключение к интернету или NTP-серверы."
+    echo "Предупреждение: синхронизация времени не удалась. Проверьте интернет или NTP-серверы."
 fi
 
 # Вывод текущего статуса

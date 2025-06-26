@@ -1,32 +1,39 @@
 #!/bin/bash
 
-# Updating and upgrading the system
-echo "Updating system packages..."
+# Проверка на root-права
+if [[ $EUID -ne 0 ]]; then
+   echo "Этот скрипт нужно запускать с правами root. Используйте sudo перед запуском."
+   exit 1
+fi
+
+# Обновление системы
+echo "Обновление системы..."
 sudo apt update && sudo apt upgrade -y
 
-# Reinstalling ubuntu-desktop
-echo "Reinstalling ubuntu-desktop..."
+# Переустановка ubuntu-desktop
+echo "Переустановка ubuntu-desktop..."
 sudo apt purge ubuntu-desktop -y
 sudo apt install --reinstall ubuntu-desktop -y
 
-# Fixing broken packages
-echo "Fixing any broken packages..."
+# Исправление повреждённых пакетов
+echo "Исправление повреждённых пакетов..."
 sudo apt install -f -y
 sudo dpkg --configure -a
 
-# Installing recommended graphics drivers
-echo "Installing recommended graphics drivers..."
+# Установка рекомендуемых драйверов графики
+echo "Установка драйверов графики..."
+sudo apt install -y ubuntu-drivers-common
 sudo ubuntu-drivers autoinstall
 
-# Cleaning up cache and temporary files
-echo "Cleaning up cache..."
+# Очистка кеша
+echo "Очистка кеша и временных файлов..."
 sudo apt clean
 sudo apt autoclean
 
-# Configuring automatic updates
-echo "Setting up automatic updates..."
-sudo apt install unattended-upgrades -y
+# Настройка автоматических обновлений
+echo "Настройка автоматических обновлений..."
+sudo apt install -y unattended-upgrades
 sudo dpkg-reconfigure --priority=low unattended-upgrades
 
-echo "Script completed. Please reboot your system to apply changes."
-echo "Reboot with: sudo reboot"
+echo "Скрипт завершён. Перезагрузите систему для применения изменений."
+echo "Перезагрузка: sudo reboot"
